@@ -31,7 +31,7 @@ int main(void){
 	int status;             	/* status returned by wait */
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
-    char* status_res_str;
+    	char* status_res_str;
 	printf("Welcome to the Shell\n\n");
 
 	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
@@ -46,18 +46,18 @@ int main(void){
 			if(!background){
 				waitpid(pid_fork, &status, 0);
 				if(WEXITSTATUS(status) != 0){
-                    printf("Error, command not found: %s\n", args[0]);
+                    			printf("Error, command not found: %s\n", args[0]);
 				}else{
 				    status_res = analyze_status(status, &info);
 				    if(status_res == 0){
-                        status_res_str = "SUSPENDED";
+                        		status_res_str = "SUSPENDED";
 				    }else if(status_res == 1){
-                        status_res_str = "SIGNALED";
+                        		status_res_str = "SIGNALED";
 				    }else if(status_res == 2){
 				        status_res_str = "EXITED";
 				    }
 				    printf("\nForeground pid: %d, command %s, %s, info: %d\n",
-                    pid_fork, args[0], status_res_str, info);
+                    			pid_fork, args[0], status_res_str, info);
 				}
 			}else{
 			    printf("Backgroud running job... pid: %d, command %s\n", pid_fork, args[0]);
