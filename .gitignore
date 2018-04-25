@@ -16,6 +16,11 @@
 *.gch
 *.pch
 
+#Makefile Files
+*.txt
+.idea/
+cmake-build-debug/
+
 # Libraries
 *.lib
 *.a
