@@ -20,7 +20,9 @@ To compile and run the program:
 //                            MAIN          							   //
 // ----------------------------------------------------------------------- //
 
-int main(void){	
+
+
+int main(void){
 	char inputBuffer[MAX_LINE]; /* buffer to hold the command entered */
 	int background;             /* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/2];     /* command line (of 256) has max of 128 arguments */
@@ -29,6 +31,7 @@ int main(void){
 	int status;             	/* status returned by wait */
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
+    char* status_res_str;
 	printf("Welcome to the Shell\n\n");
 
 	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
@@ -43,14 +46,24 @@ int main(void){
 			if(!background){
 				waitpid(pid_fork, &status, 0);
 				if(WEXITSTATUS(status) != 0){
-                    printf("Error, command not found. %s\n", args[0]);
+                    printf("Error, command not found: %s\n", args[0]);
 				}else{
 				    status_res = analyze_status(status, &info);
 				    if(status_res == 0){
-                        
+                        status_res_str = "SUSPENDED";
+				    }else if(status_res == 1){
+                        status_res_str = "SIGNALED";
+				    }else if(status_res == 2){
+				        status_res_str = "EXITED";
 				    }
+				    printf("\nForeground pid: %d, command %s, %s, info: %d\n",
+                    pid_fork, args[0], status_res_str, info);
 				}
+			}else{
+			    printf("Backgroud running job... pid: %d, command %s\n", pid_fork, args[0]);
 			}
+		}else{
+		    exit(execvp(args[0], args));
 		}
 		/*
 			1. Ejecutar los comandos en un proceso independiente.
