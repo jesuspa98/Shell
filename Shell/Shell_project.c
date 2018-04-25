@@ -38,7 +38,20 @@ int main(void){
 		
 		if(args[0]==NULL) continue;   // if empty command
 		
-
+		pid_fork = fork();
+		if(pid_fork){
+			if(!background){
+				waitpid(pid_fork, &status, 0);
+				if(WEXITSTATUS(status) != 0){
+                    printf("Error, command not found. %s\n", args[0]);
+				}else{
+				    status_res = analyze_status(status, &info);
+				    if(status_res == 0){
+                        
+				    }
+				}
+			}
+		}
 		/*
 			1. Ejecutar los comandos en un proceso independiente.
 			2. Esperar o no a la finalizacion del comando dependiendo de 
