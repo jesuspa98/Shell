@@ -20,9 +20,8 @@ To compile and run the program:
 //                            MAIN          							   //
 // ----------------------------------------------------------------------- //
 
-
-
 int main(void){
+	ignore_terminal_signals();	/*Ignore SIGINT SIGQUIT SIGTSTP SIG TTIN SIGTTOU signals*/
 	char inputBuffer[MAX_LINE]; /* buffer to hold the command entered */
 	int background;             /* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/2];     /* command line (of 256) has max of 128 arguments */
@@ -32,10 +31,11 @@ int main(void){
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
     	char* status_res_str;
-	printf("Welcome to Conchita Wrust\n\n");
+	printf("Welcome to the Shell\n\n");
 
 	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
-		printf("Conchita-> ");
+		ignore_terminal_signals();	/*Ignore SIGINT SIGQUIT SIGTSTP SIG TTIN SIGTTOU signals*/
+		printf("Command-> ");
 		fflush(stdout);
 		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
 		
@@ -43,10 +43,13 @@ int main(void){
 		
 		pid_fork = fork();
 		if(pid_fork){
-			if(!background){
+			if(!background){	//Checks if it's in background
 				waitpid(pid_fork, &status, 0);
+				restore_terminal_signals();
+
+
 				if(WEXITSTATUS(status) != 0){
-                    			printf("Error, command not found: %s\n", args[0]);
+                    printf("Error, command not found: %s\n", args[0]);
 				}else{
 				    status_res = analyze_status(status, &info);
 				    if(status_res == 0){
@@ -55,7 +58,10 @@ int main(void){
                         		status_res_str = "SIGNALED";
 				    }else if(status_res == 2){
 				        status_res_str = "EXITED";
+				    }else if(status_res == 4){
+				    	status_res_str = "CONTINUED";
 				    }
+
 				    printf("\nForeground pid: %d, command %s, %s, info: %d\n",
                     			pid_fork, args[0], status_res_str, info);
 				}
@@ -66,13 +72,6 @@ int main(void){
 		    exit(execvp(args[0], args));
 		}
 		/*
-			1. Ejecutar los comandos en un proceso independiente.
-			2. Esperar o no a la finalizacion del comando dependiendo de 
-			   si el comando era de primer o segundo plano (foreground/background)
-			3.Dar un mennsaje que informe de la terminacion o no del comando y
-			  y de sus datos identificativos
-			4. Continuar con el bucle para tratar el siguiente comando
-			
 		   the steps are:
 			 (1) fork a child process using fork()
 			 (2) the child process will invoke execvp()
