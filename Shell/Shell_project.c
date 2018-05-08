@@ -32,10 +32,10 @@ int main(void){
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
     	char* status_res_str;
-	printf("Welcome to the Shell\n\n");
+	printf("Welcome to Conchita Wrust\n\n");
 
 	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
-		printf("COMMAND-> ");
+		printf("Conchita-> ");
 		fflush(stdout);
 		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
 		
