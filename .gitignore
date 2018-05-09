@@ -60,3 +60,5 @@ dkms.conf
 #Other Files
 buildAndRun.sh
 build/
+Build/
+Shell

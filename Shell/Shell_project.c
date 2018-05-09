@@ -14,8 +14,11 @@ To compile and run the program:
 **/
 
 #include "job_control.h"   // remember to compile with module job_control.c 
+#include <libgen.h>
+#include <string.h>
 #define MAX_LINE 256 /* 256 chars per line, per command, should be enough. */
 
+char* status_info(int status, int info);
 // ----------------------------------------------------------------------- //
 //                            MAIN          							   //
 // ----------------------------------------------------------------------- //
@@ -30,7 +33,7 @@ int main(void){
 	int status;             	/* status returned by wait */
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
-    	char* status_res_str;
+    char* status_res_str;
 	printf("Welcome to the Shell\n\n");
 
 	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
@@ -40,37 +43,31 @@ int main(void){
 		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
 		
 		if(args[0]==NULL) continue;   // if empty command
-		
+
 		pid_fork = fork();
 		if(pid_fork){
 			if(!background){	//Checks if it's in background
+				//FATHER
 				waitpid(pid_fork, &status, 0);
-				restore_terminal_signals();
-
-
-				if(WEXITSTATUS(status) != 0){
-                    printf("Error, command not found: %s\n", args[0]);
-				}else{
-				    status_res = analyze_status(status, &info);
-				    if(status_res == 0){
-                        		status_res_str = "SUSPENDED";
-				    }else if(status_res == 1){
-                        		status_res_str = "SIGNALED";
-				    }else if(status_res == 2){
-				        status_res_str = "EXITED";
-				    }else if(status_res == 4){
-				    	status_res_str = "CONTINUED";
-				    }
-
-				    printf("\nForeground pid: %d, command %s, %s, info: %d\n",
-                    			pid_fork, args[0], status_res_str, info);
-				}
-			}else{
-			    printf("Backgroud running job... pid: %d, command %s\n", pid_fork, args[0]);
 			}
-		}else{
+		}else{/*FOREGROUND COMMAND. SON*/
+			//Restores the signals here because this is the forked process.
+			//The father is immune to the signals, this code does not
+			//Modify the father behaviour.
+			restore_terminal_signals();
+			set_terminal(getppid());
 		    exit(execvp(args[0], args));
 		}
+		
+		if(WEXITSTATUS(status) != 0){
+            printf("Error, command not found: %s\n", args[0]);
+        }else if (background){/*BACKGROUND COMMAND*/
+        	printf("\nBackground running job... pid: %d, command %s\n", pid_fork, args[0]);
+        	status_res_str = status_info(status, info);
+        }else{
+        	status_res_str = status_info(status, info);
+        	printf("\nForeground pid: %d, command: %s, %s, info: %d\n", pid_fork, args[0], status_res_str, info);
+        }
 		/*
 		   the steps are:
 			 (1) fork a child process using fork()
@@ -81,4 +78,22 @@ int main(void){
 		*/
 
 	} // end while
+}
+
+char* status_info(int status, int info){
+	char* status_res_str;
+	int status_res;
+	status_res = analyze_status(status, &info);
+
+    if(status_res == 0){
+        status_res_str = "SUSPENDED";
+    }else if(status_res == 1){
+        status_res_str = "SIGNALED";
+    }else if(status_res == 2){
+        status_res_str = "EXITED";
+    }else if(status_res == 4){
+    	status_res_str = "CONTINUED";
+    }
+
+    return status_res_str;
 }
