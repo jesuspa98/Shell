@@ -15,7 +15,9 @@ To compile and run the program:
 
 #include "job_control.h"   // remember to compile with module job_control.c 
 #include <libgen.h>
+#include "commands.c"
 #include <string.h>
+#define SHELL "shell"
 #define MAX_LINE 256 /* 256 chars per line, per command, should be enough. */
 
 char* status_info(int status, int info);
@@ -33,40 +35,45 @@ int main(void){
 	int status;             	/* status returned by wait */
 	enum status status_res; 	/* status processed by analyze_status() */
 	int info;					/* info processed by analyze_status() */
-    char* status_res_str;
+    char* status_res_str, *aux;
 	printf("Welcome to the Shell\n\n");
-
-	while (1){   				/* Program terminates normally inside get_command() after ^D is typed*/
+	new_process_group(getpid()); //Process group Tarea 2
+	while(1){   				/* Program terminates normally inside get_command() after ^D is typed*/
 		ignore_terminal_signals();	/*Ignore SIGINT SIGQUIT SIGTSTP SIG TTIN SIGTTOU signals*/
-		printf("Command-> ");
+		aux = strdup(getenv("PWD"));
+		printf("[%s@shell:%s]$ ", getenv("USER"), basename(aux));
+		free(aux);
 		fflush(stdout);
 		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
 		
 		if(args[0]==NULL) continue;   // if empty command
+        if(!isAShellOrder(args[0], args)) {
+            pid_fork = fork();
+            if (pid_fork) {
+                new_process_group(pid_fork);
+                if (!background) {    //Checks if it's in background
+                    //FATHER
+                    set_terminal(pid_fork);
+                    waitpid(pid_fork, &status, 0);
+                    set_terminal(getpid());
+                }
+            } else {/*FOREGROUND COMMAND. SON*/
+                //Restores the signals here because this is the forked process.
+                //The father is immune to the signals, this code does not
+                //Modify the father behaviour.
+                restore_terminal_signals();
+                exit(execvp(args[0], args));
+            }
 
-		pid_fork = fork();
-		if(pid_fork){
-			if(!background){	//Checks if it's in background
-				//FATHER
-				waitpid(pid_fork, &status, 0);
-			}
-		}else{/*FOREGROUND COMMAND. SON*/
-			//Restores the signals here because this is the forked process.
-			//The father is immune to the signals, this code does not
-			//Modify the father behaviour.
-			restore_terminal_signals();
-			set_terminal(getppid());
-		    exit(execvp(args[0], args));
-		}
-		
-		if(WEXITSTATUS(status) != 0){
-            printf("Error, command not found: %s\n", args[0]);
-        }else if (background){/*BACKGROUND COMMAND*/
-        	printf("\nBackground running job... pid: %d, command %s\n", pid_fork, args[0]);
-        	status_res_str = status_info(status, info);
-        }else{
-        	status_res_str = status_info(status, info);
-        	printf("\nForeground pid: %d, command: %s, %s, info: %d\n", pid_fork, args[0], status_res_str, info);
+            if (WEXITSTATUS(status) != 0) {
+                printf("Error, command not found: %s\n", args[0]);
+            } else if (background) {/*BACKGROUND COMMAND*/
+                printf("\nBackground running job... pid: %d, command %s\n", pid_fork, args[0]);
+                status_res_str = status_info(status, info);
+            } else {
+                status_res_str = status_info(status, info);
+                printf("\nForeground pid: %d, command: %s, %s, info: %d\n", pid_fork, args[0], status_res_str, info);
+            }
         }
 		/*
 		   the steps are:
