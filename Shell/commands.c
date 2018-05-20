@@ -31,7 +31,7 @@ int isAShellOrder(char*commandName, char* argsv[]){
     return !notEquals;
 }
 
-void cd(int args, char* argsv[]){
+static void cd(int args, char* argsv[]){
     //acceder a un directorio
     if(args == 1){
         chdir("/home/jesuspa98");
@@ -41,12 +41,12 @@ void cd(int args, char* argsv[]){
         }
     }
 }
-void jobs(int args, char* argsv[]){
+static void jobs(int args, char* argsv[]){
     //mostrar los jobs actuales
     print_job_list(job_list);
 }
 
-void fg(int args, char* argsv[]){
+static void fg(int args, char* argsv[]){
     //Poner una tarea de las que esta en segundo plano o suspendida en primer plano
     unblock_SIGCHLD();
     int num;
@@ -93,7 +93,7 @@ void fg(int args, char* argsv[]){
     unblock_SIGCHLD();
 }
 
-void bg(int args, char* argsv[]){
+static void bg(int args, char* argsv[]){
 	 block_SIGCHLD();
     int num;
 
@@ -113,7 +113,7 @@ void bg(int args, char* argsv[]){
     unblock_SIGCHLD();
 }
 
-int args(char* argsv[]){
+static int args(char* argsv[]){
     //cantidad de argumentos que tiene argsv
     int args = 0;
 
