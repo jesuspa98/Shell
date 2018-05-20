@@ -17,18 +17,18 @@ static int args(char* argsv[]);
 static const ShellCommands shellCommands[] = { {"cd", cd}, {"jobs", jobs}, {"fg", fg}, {"bg", bg} };
 
 int isAShellOrder(char*commandName, char* argsv[]){
-    int equals = 1, i = 0;
+    int notEquals = 1, i = 0;
     size_t length = sizeof(shellCommands)/ sizeof(shellCommands[0]);
-    while(equals && i < length){
-        equals = strcmp(commandName, shellCommands[i].name);
+    while(notEquals && i < length){
+        notEquals = strcmp(commandName, shellCommands[i].name);
         i++;
     }
 
-    if(!equals){
+    if(!notEquals){
         shellCommands[i - 1].func(args(argsv), argsv);
     }
 
-    return !equals;
+    return !notEquals;
 }
 
 void cd(int args, char* argsv[]){
@@ -58,13 +58,16 @@ void fg(int args, char* argsv[]){
     }
 
     job* job = get_item_bypos(job_list, num);
+
     if(job != NULL){
         int status, info;
         enum status status_res;
 
         job->state = FOREGROUND;
+
         //Cedemos la terminal al grupo de procesos...
         set_terminal(job->pgid);
+
         //...y les hacemos notificar de ello para que puedan ejecutarse sin problemas
         printf("%s\n", job->command);
         killpg(job->pgid, SIGCONT);
@@ -90,24 +93,21 @@ void fg(int args, char* argsv[]){
     unblock_SIGCHLD();
 }
 
-void bg(int args, char*  argsv[]){
-    //poner una tarea que esta suspendida ejecutando en segundo plano
-    block_SIGCHLD();
+void bg(int args, char* argsv[]){
+	 block_SIGCHLD();
     int num;
 
-    if(args != 1){
+    if(args != 1) {
         num = atoi(argsv[1]);
-    }else{
+    } else {
         num = 1;
     }
-
-    job* job = get_item_bypid(job_list, num);
-
-    if(job != NULL){
-        job->state = BACKGROUND;
-        killpg(job->pgid, SIGCONT);
-    }else{
-        printf("Job %s doesn't exists\n", num);
+    job* job = get_item_bypos(job_list, num);
+    if(job != NULL) {
+        job->state = BACKGROUND;    		// Modify the job state to backgroud
+        killpg(job->pgid, SIGCONT); 		// Send signal SIGCONT to the process group job-pgid
+    } else {
+        printf("Job %d doesn't exists\n", num);
     }
 
     unblock_SIGCHLD();

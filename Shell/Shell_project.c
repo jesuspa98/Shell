@@ -28,30 +28,30 @@ To compile and run the program:
 job* job_list;
 void SIGCHLD_handler();
 int isAShellOrder(char* commandName, char* argsv[]);
-// ----------------------------------------------------------------------- //
-//                            MAIN          							   //
-// ----------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------------------------------------------------------------ //
+//                            MAIN          							   																//
+// ------------------------------------------------------------------------------------------------------------------------------------ //
 
 int main(void){
-	ignore_terminal_signals();	/*Ignore SIGINT SIGQUIT SIGTSTP SIG TTIN SIGTTOU signals*/
-	job_list = new_list("Shell jobs");
-	char inputBuffer[MAX_LINE]; /* buffer to hold the command entered */
-	int background;             /* equals 1 if a command is followed by '&' */
-	char *args[MAX_LINE/2];     /* command line (of 256) has max of 128 arguments */
+	ignore_terminal_signals();									/*Ignore SIGINT SIGQUIT SIGTSTP SIG TTIN SIGTTOU signals*/
+	job_list = new_list("Shell jobs");							//Job lists called Shell Jobs
+	char inputBuffer[MAX_LINE]; 								/* buffer to hold the command entered */
+	int background;             								/* equals 1 if a command is followed by '&' */
+	char *args[MAX_LINE/2];     								/* command line (of 256) has max of 128 arguments */
 	// probably useful variables:
-	int pid_fork, pid_wait; 	/* pid for created and waited process */
-	int status;             	/* status returned by wait */
-	enum status status_res; 	/* status processed by analyze_status() */
-	int info, goid_father;		/* info processed by analyze_status() */
-    char* status_res_str;		//Auxiliar definition
-    //-- START CODE --//
-	new_process_group(getpid()); //Process group Tarea 2
+	int pid_fork, pid_wait; 									/* pid for created and waited process */
+	int status;             									/* status returned by wait */
+	enum status status_res; 									/* status processed by analyze_status() */
+	int info, goid_father;										/* info processed by analyze_status() */
+    char* status_res_str;										//Auxiliar definition
+	new_process_group(getpid()); 								//Process group Tarea 2
 	printf("Welcome to the %s\n\n", Shell);
     signal(SIGCHLD, SIGCHLD_handler);
-	while(1){   				/* Program terminates normally inside get_command() after ^D is typed*/
+	while(1){   												/* Program terminates normally inside get_command() after ^D is typed*/
 		{
 			char currentPath[255];
-			getcwd(currentPath, 255); //Current path, simply aesthetic.
+			getcwd(currentPath, 255); 							//Current path, simply aesthetic.
+
 			printf("[%s@%s:%s]$ ", getenv("USER"), Shell, basename(currentPath));
 			fflush(stdout);
 		}
@@ -67,17 +67,16 @@ int main(void){
         if(!isAShellOrder(args[0], args)){
             pid_fork = fork();
 
-            if(pid_fork){
-                // FATHER.
+            if(pid_fork){										// FATHER.
 
-                if(!background){ // Checks if the command eecuted is a background command.
+                if(!background){ 								// Checks if the command eecuted is a background command.
                     unblock_SIGCHLD();
                     set_terminal(pid_fork);
                     pid_wait = waitpid(pid_fork, &status, WUNTRACED);
                     set_terminal(getpid());
                 }
 
-                // STATUS MESSAGES THAT THE SHELL SENDS TO THE USER.
+                // Status messages that the Shell send to the User
                 status_res = analyze_status(status, &info);
                 status_res_str = status_strings[status_res];
 
@@ -102,7 +101,7 @@ int main(void){
                 //The father is immune to the signals, this code does not
                 //Modify the father behaviour.
                 unblock_SIGCHLD();
-                /* FOREGROUND COMMANDS. SON. */
+                //FOREGROUND COMMANDS. SON.
                 new_process_group(getpid());
 
                 if(!background){
@@ -131,7 +130,7 @@ void SIGCHLD_handler(){
                 hasToBeDeleted = 1;
                 printf(" [%d]+ Done\n", n);
             } else if(job->state != STOPPED && status_res == SUSPENDED) {
-                //Si se ha suspendido, hay que anotarlo y notificarlo
+                //If it's suspended, notify and save
                 job->state = STOPPED;
                 printf(" - %d %s has been suspended\n", job->pgid, job->command);
             }
