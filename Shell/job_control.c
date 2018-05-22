@@ -37,8 +37,8 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 	start = -1;
 	if (length == 0)
 	{
-		printf("\nBye\n");
-		exit(0);            /* ^d was entered, end of user command stream */
+        printf("\nExiting \033[31mShell\033[0m\n");
+        exit(0);            /* ^d was entered, end of user command stream */
 	} 
 	if (length < 0){
 		perror("error reading the command");
