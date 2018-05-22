@@ -50,38 +50,24 @@ int main(void) {
 		if(args[0]==NULL) continue;   // if empty command
         pid_fork = fork();
         if(pid_fork){
-            if(!background){
-                waitpid(pid_fork, &status, 0);
-                if(WEXITSTATUS(status)){
-                    printf("Error, command not found: %s\n", args[0]);
-                }else{
-                    status_res = analyze_status(status, &info);
-                    if(status_res == 0){
-                        status_res_str = "SUSPENDED";
-                    }else if(status_res == 1){
-                        status_res_str = "SIGNALED";
-                    }else if(status_res == 2){
-                        status_res_str = "EXITED";
-                    }else if(status_res == 3){
-                        status_res_str = "CONTINUED";
-                    }
-                    printf("\nForeground %s: %d, %s: %s, %s, %s: %d\n",
-                           Pid, pid_fork, Command, args[0], status_res_str, Info, info);
-                }
+
+            if(!background) {
+                pid_wait = waitpid(pid_fork, &status, 0);
+            }
+
+            status_res = analyze_status(status, &info);
+            status_res_str = status_strings[status_res];
+
+            if(WEXITSTATUS(status) == 127){
+                printf("\nError, command not found: %s\n", args[0]);
+            }else if(background){
+                printf("Background running job... %s: %d, %s: %s\n", Pid, pid_fork, Command, args[0]);
             }else{
-                    printf("\nBackground job running... %s: %d, %s: %s\n", Pid, pid_fork, Command, args[0]);
+                printf("\nForeground %s: %d, %s: %s, %s, %s: %d\n", Pid, pid_fork,
+                       Command, args[0], status_res_str, Info, info);
             }
         }else{
             exit(execvp(args[0], args));
         }
-
-		/* the steps are:
-			 (1) fork a child process using fork()
-			 (2) the child process will invoke execvp()
-			 (3) if background == 0, the parent will wait, otherwise continue 
-			 (4) Shell shows a status message for processed command 
-			 (5) loop returns to get_commnad() function
-		*/
-
 	} // end while
 }
