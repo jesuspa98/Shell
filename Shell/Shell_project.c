@@ -1,4 +1,8 @@
 /**
+ * Nombre: Jesús Parejo Aliaga
+ * Curso: 2º Ingeniería de Software A
+ * DNI: 51183891J
+/**
 UNIX Shell Project
 
 Sistemas Operativos
