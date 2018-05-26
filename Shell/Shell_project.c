@@ -108,9 +108,7 @@ int main(void) {
                     set_terminal(pid_fork);
                     pid_wait = waitpid(pid_fork, &status, WUNTRACED);
                     set_terminal(getpid());
-                } /*else {
-                    add_job(job_list, new_job(pid_fork, args[0], BACKGROUND));
-                }*/
+                }
 
                 status_res = analyze_status(status, &info);
                 status_res_str = status_strings[status_res];
