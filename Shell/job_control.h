@@ -27,8 +27,7 @@ static char* status_strings[] = { "Suspended", "Signaled", "Exited", "Continued"
 static char* state_strings[] = { "Foreground", "Background", "Stopped" };
 
 // ----------- JOB TYPE FOR JOB LIST ------------------------------------
-typedef struct job_
-{
+typedef struct job_{
 	pid_t pgid; /* group id = process lider id */
 	char * command; /* program name */
 	enum job_state state;
@@ -92,4 +91,3 @@ void block_signal(int signal, int block);
 
 // -----------------------------------------------------------------------
 #endif
-

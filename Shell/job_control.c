@@ -12,7 +12,6 @@ Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 #include "job_control.h"
 
 // -----------------------------------------------------------------------
@@ -21,8 +20,7 @@ Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
 //  null-terminated string.
 // -----------------------------------------------------------------------
 
-void get_command(char inputBuffer[], int size, char *args[],int *background)
-{
+void get_command(char inputBuffer[], int size, char *args[],int *background){
 	int length, /* # of characters in the command line */
 		i,      /* loop index for accessing inputBuffer array */
 		start,  /* index where beginning of next command parameter is */
@@ -35,8 +33,7 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 	length = read(STDIN_FILENO, inputBuffer, size);  
 
 	start = -1;
-	if (length == 0)
-	{
+	if (length == 0){
         printf("\nExiting \033[31mShell\033[0m\n");
         exit(0);            /* ^d was entered, end of user command stream */
 	} 
@@ -46,14 +43,11 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 	}
 
 	/* examine every character in the inputBuffer */
-	for (i=0;i<length;i++) 
-	{ 
-		switch (inputBuffer[i])
-		{
+	for (i=0;i<length;i++) { 
+		switch (inputBuffer[i]){
 		case ' ':
 		case '\t' :               /* argument separators */
-			if(start != -1)
-			{
+			if(start != -1){
 				args[ct] = &inputBuffer[start];    /* set up pointer */
 				ct++;
 			}
@@ -62,8 +56,7 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 			break;
 
 		case '\n':                 /* should be the final char examined */
-			if (start != -1)
-			{
+			if (start != -1){
 				args[ct] = &inputBuffer[start];     
 				ct++;
 			}
@@ -73,11 +66,9 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 
 		default :             /* some other character */
 
-			if (inputBuffer[i] == '&') // background indicator
-			{
+			if (inputBuffer[i] == '&'){ // background indicator
 				*background  = 1;
-				if (start != -1)
-				{
+				if (start != -1){
 					args[ct] = &inputBuffer[start];     
 					ct++;
 				}
@@ -96,8 +87,7 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 // -----------------------------------------------------------------------
 /* devuelve puntero a un nodo con sus valores inicializados,
 devuelve NULL si no pudo realizarse la reserva de memoria*/
-job * new_job(pid_t pid, const char * command, enum job_state state)
-{
+job * new_job(pid_t pid, const char * command, enum job_state state){
 	job * aux;
 	aux=(job *) malloc(sizeof(job));
 	aux->pgid=pid;
@@ -109,8 +99,7 @@ job * new_job(pid_t pid, const char * command, enum job_state state)
 
 // -----------------------------------------------------------------------
 /* inserta elemento en la cabeza de la lista */
-void add_job (job * list, job * item)
-{
+void add_job (job * list, job * item){
 	job * aux=list->next;
 	list->next=item;
 	item->next=aux;
@@ -121,12 +110,10 @@ void add_job (job * list, job * item)
 // -----------------------------------------------------------------------
 /* elimina el elemento indicado de la lista 
 devuelve 0 si no pudo realizarse con exito */
-int delete_job(job * list, job * item)
-{
+int delete_job(job * list, job * item){
 	job * aux=list;
 	while(aux->next!= NULL && aux->next!= item) aux=aux->next;
-	if(aux->next)
-	{
+	if(aux->next){
 		aux->next=item->next;
 		free(item->command);
 		free(item);
@@ -140,15 +127,13 @@ int delete_job(job * list, job * item)
 // -----------------------------------------------------------------------
 /* busca y devuelve un elemento de la lista cuyo pid coincida con el indicado,
 devuelve NULL si no lo encuentra */
-job * get_item_bypid  (job * list, pid_t pid)
-{
+job * get_item_bypid  (job * list, pid_t pid){
 	job * aux=list;
 	while(aux->next!= NULL && aux->next->pgid != pid) aux=aux->next;
 	return aux->next;
 }
 // -----------------------------------------------------------------------
-job * get_item_bypos( job * list, int n)
-{
+job * get_item_bypos( job * list, int n){
 	job * aux=list;
 	if(n<1 || n>list->pgid) return NULL;
 	n--;
@@ -158,21 +143,17 @@ job * get_item_bypos( job * list, int n)
 
 // -----------------------------------------------------------------------
 /*imprime una linea en el terminal con los datos del elemento: pid, nombre ... */
-void print_item(job * item)
-{
-
+void print_item(job * item){
 	printf("pid: %d, command: %s, state: %s\n", item->pgid, item->command, state_strings[item->state]);
 }
 
 // -----------------------------------------------------------------------
 /*recorre la lista y le aplica la funcion pintar a cada elemento */
-void print_list(job * list, void (*print)(job *))
-{
+void print_list(job * list, void (*print)(job *)){
 	int n=1;
 	job * aux=list;
 	printf("Contents of %s:\n",list->command);
-	while(aux->next!= NULL) 
-	{
+	while(aux->next!= NULL){
 		printf(" [%d] ",n);
 		print(aux->next);
 		n++;
@@ -182,30 +163,22 @@ void print_list(job * list, void (*print)(job *))
 
 // -----------------------------------------------------------------------
 /* interpretar valor status que devuelve wait */
-enum status analyze_status(int status, int *info)
-{
+enum status analyze_status(int status, int *info){
 	// el proceso se ha suspendido 
-	if (WIFSTOPPED (status))
-	{
+	if (WIFSTOPPED (status)){
 		*info=WSTOPSIG(status);
 		return(SUSPENDED);
 	}
 	// el proceso se ha reanudado
-    else if (WIFCONTINUED(status))
-    { 
+    else if (WIFCONTINUED(status)){ 
         *info=0; 
         return(CONTINUED);
-    }
-	else
-	{
+    }else{
 		// el proceso ha terminado 
-		if (WIFSIGNALED (status))
-		{ 
+		if (WIFSIGNALED (status)){
 			*info=WTERMSIG (status); 
 			return(SIGNALED);
-		}
-		else
-		{ 
+		}else{ 
 			*info=WEXITSTATUS(status); 
 			return(EXITED);
 		}
@@ -215,8 +188,7 @@ enum status analyze_status(int status, int *info)
 
 // -----------------------------------------------------------------------
 // cambia la accion de las seÃ±ales relacionadas con el terminal
-void terminal_signals(void (*func) (int))
-{
+void terminal_signals(void (*func) (int)){
 	signal (SIGINT,  func); // crtl+c interrupt tecleado en el terminal
 	signal (SIGQUIT, func); // ctrl+\ quit tecleado en el terminal
 	signal (SIGTSTP, func); // crtl+z Stop tecleado en el terminal
@@ -225,22 +197,16 @@ void terminal_signals(void (*func) (int))
 }		
 
 // -----------------------------------------------------------------------
-void block_signal(int signal, int block)
-{
+void block_signal(int signal, int block){
 	/* declara e inicializa máscara */
 	sigset_t block_sigchld;
 	sigemptyset(&block_sigchld );
 	sigaddset(&block_sigchld,signal);
-	if(block)
-	{
+	if(block){
 		/* bloquea señal */
 		sigprocmask(SIG_BLOCK, &block_sigchld, NULL);
-	}
-	else
-	{
+	}else{
 		/* desbloquea señal */
 		sigprocmask(SIG_UNBLOCK, &block_sigchld, NULL);
 	}
 }
-
-
