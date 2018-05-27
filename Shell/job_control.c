@@ -94,6 +94,7 @@ job * new_job(pid_t pid, const char * command, enum job_state state){
 	aux->state=state;
 	aux->command=strdup(command);
 	aux->next=NULL;
+	aux->times = 0;
 	return aux;
 }
 
@@ -144,8 +145,8 @@ job * get_item_bypos( job * list, int n){
 // -----------------------------------------------------------------------
 /*imprime una linea en el terminal con los datos del elemento: pid, nombre ... */
 void print_item(job * item){
-	printf("pid: %d, command: %s, state: %s\n", item->pgid, item->command, state_strings[item->state]);
-}
+	printf("pid: %d, command: %s, state: %s, times: %d\n", item->pgid, item->command, state_strings[item->state], item->times);
+}//MODIFICADO AQUI-------------------------------------------------------------------------------------------------------------------------->>>
 
 // -----------------------------------------------------------------------
 /*recorre la lista y le aplica la funcion pintar a cada elemento */
@@ -156,6 +157,7 @@ void print_list(job * list, void (*print)(job *)){
 	while(aux->next!= NULL){
 		printf(" [%d] ",n);
 		print(aux->next);
+		//printf(", times: %d", aux->times);
 		n++;
 		aux=aux->next;
 	}

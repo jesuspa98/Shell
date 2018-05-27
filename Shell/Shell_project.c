@@ -42,30 +42,20 @@ To compile and run the program:
 */
 typedef struct commands {
     char *name;
-
     void (*func)(int args, char *argsv[]);
 } ShellCommands;
 job *job_list;
-
 /**
  * Other Functions.
  */
 int isAShellOrder(char *commandName, char *argsv[]);
-
 void SIGCHLD_handler(int signal);
-
 static void cd(int args, char *argsv[]);
-
 static void jobs(int args, char *argsv[]);
-
 static void fg(int args, char *argsv[]);
-
 static void bg(int args, char *argsv[]);
-
 static int args(char *argsv[]);
-
 static void exits(int args, char *argsv[]);
-
 static const ShellCommands shellCommands[] = {{"cd", cd}, {"jobs", jobs}, {"fg", fg}, {"bg", bg}, {"exit", exits}};
 // ---------------------------------------------------------------------------//
 //                            		MAIN          							  //
@@ -106,13 +96,24 @@ int main(void) {
         if (!isAShellOrder(args[0], args)) {
             pid_fork = fork();
 
-            if (pid_fork) {//Father
+            if(pid_fork) { //Father
                 if (!background) {
                     unblock_SIGCHLD();
                     set_terminal(pid_fork);
                     pid_wait = waitpid(pid_fork, &status, WUNTRACED);
                     set_terminal(getpid());
                 }
+                unblock_SIGCHLD();
+            } else  { //Son
+                unblock_SIGCHLD();
+                new_process_group(getpid());
+                if (!background) {
+                    set_terminal(getpid());
+                }
+                restore_terminal_signals();
+                execvp(args[0], args);
+                exit(127);
+            }
 
                 status_res = analyze_status(status, &info);
                 status_res_str = status_strings[status_res];
@@ -131,17 +132,6 @@ int main(void) {
                     printf("\nForeground %s: %d, %s: %s, %s, %s: %d\n", Pid, pid_fork,
                            Command, args[0], status_res_str, Info, info);
                 }
-                unblock_SIGCHLD();
-            } else {//Son
-                unblock_SIGCHLD();
-                new_process_group(getpid());
-                if (!background) {
-                    set_terminal(getpid());
-                }
-                restore_terminal_signals();
-                execvp(args[0], args);
-                exit(127);
-            }
         }
     } // end while
 }
@@ -164,6 +154,7 @@ int isAShellOrder(char *commandName, char *argsv[]) {
 }
 
 void SIGCHLD_handler(int signal) {
+    printf("\nounch!\n");
     int hasToBeDeleted, exitStatus, number = 0, info;
     enum status status_res;
     job *job = job_list->next;
@@ -224,6 +215,7 @@ static void fg(int args, char *argsv[]) {
     }
 
     job* job = get_item_bypos(job_list, num);
+    job->times++;
 
     if(job != NULL){
         int status, info;
@@ -266,6 +258,7 @@ static void bg(int args, char *argsv[]) {
     }
 
     job *job = get_item_bypos(job_list, number);
+    job->times = 0;
 
     if (job != NULL) {
         job->state = BACKGROUND;
