@@ -162,7 +162,7 @@ void SIGCHLD_handler(int signal) {
 
     while (job != NULL) {
         hasToBeDeleted = 0;
-        pid = waitpid(job->pgid, &exitStatus, WNOHANG | WUNTRACED);
+        pid = waitpid(job->pgid, &exitStatus, WNOHANG | WUNTRACED | WCONTINUED);
 
         if (pid == job->pgid) {
             status_res = analyze_status(exitStatus, &info);
