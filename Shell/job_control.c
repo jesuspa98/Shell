@@ -1,13 +1,17 @@
-/*--------------------------------------------------------
-UNIX Shell Project
-job_control module
-
-Sistemas Operativos
-Grados I. Informatica, Computadores & Software
-Dept. Arquitectura de Computadores - UMA
-
-Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
---------------------------------------------------------*/
+/**
+ * Nombre: Jesús Parejo Aliaga
+ * Curso: 2º Ingeniería de Software A
+ * DNI: 51183891J
+ *_________________________________________________________________________________
+ * UNIX Shell Project
+ * job_control module
+ * 
+ * Sistemas Operativos
+ * Grados I. Informatica, Computadores & Software
+ * Dept. Arquitectura de Computadores - UMA
+ * 
+ * Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -94,7 +98,6 @@ job * new_job(pid_t pid, const char * command, enum job_state state){
 	aux->state=state;
 	aux->command=strdup(command);
 	aux->next=NULL;
-	aux->times = 0;
 	return aux;
 }
 
@@ -145,7 +148,7 @@ job * get_item_bypos( job * list, int n){
 // -----------------------------------------------------------------------
 /*imprime una linea en el terminal con los datos del elemento: pid, nombre ... */
 void print_item(job * item){
-	printf("pid: %d, command: %s, state: %s, times: %d\n", item->pgid, item->command, state_strings[item->state], item->times);
+	printf("pid: %d, command: %s, state: %s\n", item->pgid, item->command, state_strings[item->state]);
 }//MODIFICADO AQUI-------------------------------------------------------------------------------------------------------------------------->>>
 
 // -----------------------------------------------------------------------

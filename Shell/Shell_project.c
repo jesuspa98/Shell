@@ -2,22 +2,20 @@
  * Nombre: Jesús Parejo Aliaga
  * Curso: 2º Ingeniería de Software A
  * DNI: 51183891J
-/**
-UNIX Shell Project
-
-Sistemas Operativos
-Grados I. Informatica, Computadores & Software
-Dept. Arquitectura de Computadores - UMA
-
-Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
-
-To compile and run the program:
-   $ gcc Shell_project.c job_control.c -o Shell
-   $ ./Shell          
-	(then type ^D to exit program)
-*/
-
-/**
+ *_________________________________________________________________________________
+ * UNIX Shell Project
+ * 
+ * Sistemas Operativos
+ * Grados I. Informatica, Computadores & Software
+ * Dept. Arquitectura de Computadores - UMA
+ * 
+ * Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
+ * 
+ * To compile and run the program:
+ *    $ gcc Shell_project.c job_control.c -o Shell
+ *    $ ./Shell          
+ * 	    (then type ^D to exit program)
+ * 
  * All includes
  */
 #include <libgen.h>
@@ -45,6 +43,7 @@ typedef struct commands {
     void (*func)(int args, char *argsv[]);
 } ShellCommands;
 job *job_list;
+
 /**
  * Other Functions.
  */
@@ -62,26 +61,26 @@ static const ShellCommands shellCommands[] = {{"cd", cd}, {"jobs", jobs}, {"fg",
 // ---------------------------------------------------------------------------//
 
 int main(void) {
-    ignore_terminal_signals();  // Ignores SIGINT SIGQUIT SIGTSTP SIGTTIN SIGTTOU signals.
+    ignore_terminal_signals();          // Ignores SIGINT SIGQUIT SIGTSTP SIGTTIN SIGTTOU signals.
     job_list = new_list("Shell Jobs");
-    char inputBuffer[MAX_LINE]; /* buffer to hold the command entered */
-    int background;             /* equals 1 if a command is followed by '&' */
-    char *args[MAX_LINE / 2];     /* command line (of 256) has max of 128 arguments */
+    char inputBuffer[MAX_LINE];         /* buffer to hold the command entered */
+    int background;                     /* equals 1 if a command is followed by '&' */
+    char *args[MAX_LINE / 2];           /* command line (of 256) has max of 128 arguments */
     // probably useful variables:
-    int pid_fork, pid_wait; /* pid for created and waited process */
-    int status;             /* status returned by wait */
-    enum status status_res; /* status processed by analyze_status() */
-    int info;                /* info processed by analyze_status() */
+    int pid_fork, pid_wait;             /* pid for created and waited process */
+    int status;                         /* status returned by wait */
+    enum status status_res;             /* status processed by analyze_status() */
+    int info;                           /* info processed by analyze_status() */
     char *status_res_str;
 
-    new_process_group(getpid()); // PROCESS GROUP 'TAREA' 2
+    new_process_group(getpid());        // PROCESS GROUP 'TAREA' 2
     printf("Welcome to the %s\n\n", Shell);
     signal(SIGCHLD, SIGCHLD_handler);
 
-    while (1) {  /* Program terminates normally inside get_command() after ^D is typed*/
+    while (1) {                         /* Program terminates normally inside get_command() after ^D is typed*/
         {
             char currentPath[255];
-            getcwd(currentPath, 255); //Current path, simply aesthetic.
+            getcwd(currentPath, 255);   //Current path, simply aesthetic.
             printf("[%s@%s:%s]$ ", getenv("USER"), Shell, basename(currentPath));
             fflush(stdout);
         }
@@ -91,7 +90,7 @@ int main(void) {
 
         if (args[0] == NULL) {
             unblock_SIGCHLD();
-            continue;   // if empty command
+            continue;                   // if empty command
         }
         if (!isAShellOrder(args[0], args)) {
             pid_fork = fork();
@@ -154,7 +153,6 @@ int isAShellOrder(char *commandName, char *argsv[]) {
 }
 
 void SIGCHLD_handler(int signal) {
-    printf("\nounch!\n");
     int hasToBeDeleted, exitStatus, number = 0, info;
     enum status status_res;
     job *job = job_list->next;
@@ -215,7 +213,6 @@ static void fg(int args, char *argsv[]) {
     }
 
     job* job = get_item_bypos(job_list, num);
-    job->times++;
 
     if(job != NULL){
         int status, info;
@@ -258,7 +255,6 @@ static void bg(int args, char *argsv[]) {
     }
 
     job *job = get_item_bypos(job_list, number);
-    job->times = 0;
 
     if (job != NULL) {
         job->state = BACKGROUND;
