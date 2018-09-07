@@ -57,7 +57,7 @@ static void fg(int args, char *argsv[]);
 static void bg(int args, char *argsv[]);
 static int args(char *argsv[]);
 static void exits(int args, char *argsv[]);
-static const ShellCommands shellCommands[] = {{"cd", cd}, {"jobs", jobs}, {"fg", fg}, {"bg", bg}, {"exit", exits}};
+static const ShellCommands shellCommands[] = {{"cd", cd}, {"jobs", jobs}, {"fg", fg}, {"bg", bg}, {"oka", exits}};
 
 /*************************************************************************/
 /*                                 MAIN                                  */
@@ -77,7 +77,7 @@ int main(void){
 	char *status_res_str;
 	new_process_group(getpid());        // PROCESS GROUP 'TAREA' 2
     printf("\nWelcome to the %s\n\n", Shell);
-    signal(SIGHUP, SIGHUP_handler);
+    signal(SIGCHLD, SIGCHLD_handler);
 
 	while (1){   /* Program terminates normally inside get_command() after ^D is typed*/   		
 		{
