@@ -72,21 +72,21 @@ void block_signal(int signal, int block);
 //      PUBLIC MACROS
 // -----------------------------------------------------------------------
 
-#define list_size(list) 	 list->pgid   // number of jobs in the list
-#define empty_list(list) 	 !(list->pgid)  // returns 1 (true) if the list is empty
+#define list_size(list) 	 			list->pgid   // number of jobs in the list
+#define empty_list(list) 	 			!(list->pgid)  // returns 1 (true) if the list is empty
 
-#define new_list(name) 			 new_job(0,name,FOREGROUND)  // name must be const char *
+#define new_list(name) 			 		new_job(0,name,FOREGROUND)  // name must be const char *
 
-#define print_job_list(list) 	 print_list(list, print_item)
+#define print_job_list(list) 	 		print_list(list, print_item)
 
-#define restore_terminal_signals()   terminal_signals(SIG_DFL)
-#define ignore_terminal_signals() terminal_signals(SIG_IGN)
+#define restore_terminal_signals()   	terminal_signals(SIG_DFL)
+#define ignore_terminal_signals() 		terminal_signals(SIG_IGN)
 
-#define set_terminal(pid)        tcsetpgrp (STDIN_FILENO,pid)
-#define new_process_group(pid)   setpgid (pid, pid)
+#define set_terminal(pid)        		tcsetpgrp (STDIN_FILENO,pid)
+#define new_process_group(pid)   		setpgid (pid, pid)
 
-#define block_SIGCHLD()   	 block_signal(SIGCHLD, 1)
-#define unblock_SIGCHLD() 	 block_signal(SIGCHLD, 0)
+#define block_SIGCHLD()   	 			block_signal(SIGCHLD, 1)
+#define unblock_SIGCHLD() 	 			block_signal(SIGCHLD, 0)
 
 // macro for debugging----------------------------------------------------
 // to debug integer i, use:    debug(i,%d);

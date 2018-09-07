@@ -35,12 +35,13 @@ void get_command(char inputBuffer[], int size, char *args[],int *background){
 
 	/* read what the user enters on the command line */
 	length = read(STDIN_FILENO, inputBuffer, size);  
-
 	start = -1;
+	
 	if (length == 0){
-        printf("\nExiting \033[31mShell\033[0m\n");
-        exit(0);            /* ^d was entered, end of user command stream */
+        printf("\nExiting \033[1;92mShell\033[0m\n");
+		exit(0);            /* ^d was entered, end of user command stream */
 	} 
+	
 	if (length < 0){
 		perror("error reading the command");
 		exit(-1);           /* terminate with error code of -1 */
@@ -55,38 +56,36 @@ void get_command(char inputBuffer[], int size, char *args[],int *background){
 				args[ct] = &inputBuffer[start];    /* set up pointer */
 				ct++;
 			}
+
 			inputBuffer[i] = '\0'; /* add a null char; make a C string */
 			start = -1;
 			break;
-
 		case '\n':                 /* should be the final char examined */
 			if (start != -1){
 				args[ct] = &inputBuffer[start];     
 				ct++;
 			}
+
 			inputBuffer[i] = '\0';
 			args[ct] = NULL; /* no more arguments to this command */
 			break;
-
 		default :             /* some other character */
-
 			if (inputBuffer[i] == '&'){ // background indicator
 				*background  = 1;
 				if (start != -1){
 					args[ct] = &inputBuffer[start];     
 					ct++;
 				}
+
 				inputBuffer[i] = '\0';
 				args[ct] = NULL; /* no more arguments to this command */
 				i=length; // make sure the for loop ends now
-
-			}
-			else if (start == -1) start = i;  // start of new argument
+			} else if (start == -1) start = i;  // start of new argument
 		}  // end switch
 	}  // end for   
-	args[ct] = NULL; /* just in case the input line was > MAXLINE */
-} 
 
+	args[ct] = NULL; /* just in case the input line was > MAXLINE */
+}
 
 // -----------------------------------------------------------------------
 /* devuelve puntero a un nodo con sus valores inicializados,
@@ -108,7 +107,6 @@ void add_job (job * list, job * item){
 	list->next=item;
 	item->next=aux;
 	list->pgid++;
-
 }
 
 // -----------------------------------------------------------------------
@@ -123,11 +121,11 @@ int delete_job(job * list, job * item){
 		free(item);
 		list->pgid--;
 		return 1;
-	}
-	else
+	}else{
 		return 0;
-
+	}
 }
+
 // -----------------------------------------------------------------------
 /* busca y devuelve un elemento de la lista cuyo pid coincida con el indicado,
 devuelve NULL si no lo encuentra */
@@ -136,12 +134,13 @@ job * get_item_bypid  (job * list, pid_t pid){
 	while(aux->next!= NULL && aux->next->pgid != pid) aux=aux->next;
 	return aux->next;
 }
+
 // -----------------------------------------------------------------------
 job * get_item_bypos( job * list, int n){
 	job * aux=list;
-	if(n<1 || n>list->pgid) return NULL;
+	if (n<1 || n>list->pgid) return NULL;
 	n--;
-	while(aux->next!= NULL && n) { aux=aux->next; n--;}
+	while (aux->next!= NULL && n) { aux=aux->next; n--;}
 	return aux->next;
 }
 
@@ -149,7 +148,7 @@ job * get_item_bypos( job * list, int n){
 /*imprime una linea en el terminal con los datos del elemento: pid, nombre ... */
 void print_item(job * item){
 	printf("pid: %d, command: %s, state: %s\n", item->pgid, item->command, state_strings[item->state]);
-}//MODIFICADO AQUI-------------------------------------------------------------------------------------------------------------------------->>>
+}
 
 // -----------------------------------------------------------------------
 /*recorre la lista y le aplica la funcion pintar a cada elemento */
@@ -157,10 +156,9 @@ void print_list(job * list, void (*print)(job *)){
 	int n=1;
 	job * aux=list;
 	printf("Contents of %s:\n",list->command);
-	while(aux->next!= NULL){
+	while(aux->next!= NULL) {
 		printf(" [%d] ",n);
 		print(aux->next);
-		//printf(", times: %d", aux->times);
 		n++;
 		aux=aux->next;
 	}
@@ -173,14 +171,12 @@ enum status analyze_status(int status, int *info){
 	if (WIFSTOPPED (status)){
 		*info=WSTOPSIG(status);
 		return(SUSPENDED);
-	}
-	// el proceso se ha reanudado
-    else if (WIFCONTINUED(status)){ 
+	}else if (WIFCONTINUED(status)){ // el proceso se ha reanudado 
         *info=0; 
         return(CONTINUED);
     }else{
 		// el proceso ha terminado 
-		if (WIFSIGNALED (status)){
+		if (WIFSIGNALED (status)){ 
 			*info=WTERMSIG (status); 
 			return(SIGNALED);
 		}else{ 
