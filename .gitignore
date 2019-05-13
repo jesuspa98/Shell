@@ -62,4 +62,6 @@ dkms.conf
 buildAndRun.sh
 build/
 Build/
-Shell
+*.zip
+*.rar
+*/.vscode
