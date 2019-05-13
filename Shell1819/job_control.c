@@ -1,13 +1,17 @@
-/*--------------------------------------------------------
-UNIX Shell Project
-job_control module
-
-Sistemas Operativos
-Grados I. Informatica, Computadores & Software
-Dept. Arquitectura de Computadores - UMA
-
-Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
---------------------------------------------------------*/
+/**
+ * Nombre: Jesús Parejo Aliaga
+ * Curso: 2º Ingeniería de Software C
+ * DNI: 51183891J
+ *_________________________________________________________________________________
+ * UNIX Shell Project
+ * job_control module
+ * 
+ * Sistemas Operativos
+ * Grados I. Informatica, Computadores & Software
+ * Dept. Arquitectura de Computadores - UMA
+ * 
+ * Some code adapted from "Fundamentos de Sistemas Operativos", Silberschatz et al.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +41,7 @@ void get_command(char inputBuffer[], int size, char *args[],int *background)
 	start = -1;
 	if (length == 0)
 	{
-		printf("\nBye\n");
+        printf("\nExiting \033[1;92mShell\033[0m\n");
 		exit(0);            /* ^d was entered, end of user command stream */
 	} 
 	if (length < 0){
